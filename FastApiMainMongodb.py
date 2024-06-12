@@ -49,9 +49,13 @@ async def get_book(book_id: str):
 # Route to add a new book
 @app.post("/books", response_model=Book, status_code=201)
 async def add_book(book: Book):
-    new_book = await db.books.insert_one(book.dict(by_alias=True))
-    created_book = await db.books.find_one({"_id": new_book.inserted_id})
-    return book_helper(created_book)
+    try:
+        new_book = await db.books.insert_one(book.dict(by_alias=True))
+        created_book = await db.books.find_one({"_id": new_book.inserted_id})
+        return book_helper(created_book)
+    except Exception as e:
+        print("-----------------------",e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 # Route to update a book by ID
 @app.put("/books/{book_id}", response_model=Book)
